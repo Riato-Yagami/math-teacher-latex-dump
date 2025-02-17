@@ -1,3 +1,6 @@
 [submodule "cours-de-math"]
 	path = cours-de-math
 	url = https://github.com/Riato-Yagami/cours-de-math
+[submodule "cours-de-math-public"]
+	path = cours-de-math-public
+	url = https://github.com/Riato-Yagami/cours-de-math-public
