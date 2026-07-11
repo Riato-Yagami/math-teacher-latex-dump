@@ -15,6 +15,7 @@ Le script synchronise `cours-de-math` vers `cours-de-math-public`, puis commit e
 ## Regles
 
 - Le dossier prive `cours-de-math` n'est jamais modifie.
+- Le dossier public `PDF/` est conserve tel quel : il n'est ni copie depuis le depot prive, ni supprime par la synchronisation.
 - Tout ce qui se rapporte aux evaluations reste prive.
 - Les chemins contenant `eval`, `éval`, `interro`, `controle`, `contrôle` ou `test` sont exclus du public.
 - Dans `documents`, seul `documents/enseignement` est conserve.

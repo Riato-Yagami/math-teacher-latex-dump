@@ -5,6 +5,7 @@ set -euo pipefail
 PRIVATE_SUBMODULE_PATH="cours-de-math"
 PUBLIC_REPO_PATH="cours-de-math-public"
 PUBLIC_REPO_URL="https://github.com/Riato-Yagami/cours-de-math-public.git"
+PUBLIC_REMOTE_NAME="public"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PRIVATE_DIR="$SCRIPT_DIR/$PRIVATE_SUBMODULE_PATH"
@@ -27,6 +28,15 @@ if [ ! -d "$PUBLIC_DIR/.git" ]; then
     exit 1
 fi
 
+(
+    cd "$PUBLIC_DIR"
+    if git remote get-url "$PUBLIC_REMOTE_NAME" >/dev/null 2>&1; then
+        git remote set-url "$PUBLIC_REMOTE_NAME" "$PUBLIC_REPO_URL"
+    else
+        git remote add "$PUBLIC_REMOTE_NAME" "$PUBLIC_REPO_URL"
+    fi
+)
+
 echo "Source privee : $PRIVATE_SUBMODULE_PATH"
 echo "Cible publique : $PUBLIC_REPO_PATH"
 echo "Le dossier prive n'est jamais modifie par ce script."
@@ -34,10 +44,25 @@ echo ""
 
 RSYNC_FILTERS=(
     # Never copy private git metadata and never delete public git metadata.
-    --filter='P .git'
-    --filter='P .git/***'
-    --filter='- .git'
-    --filter='- .git/***'
+    --filter='H /.git/***'
+    --filter='H /.git'
+    --filter='P /.git/***'
+    --filter='P /.git'
+    --filter='H /.gitignore'
+    --filter='P /.gitignore'
+    --filter='H /.gitmodules'
+    --filter='P /.gitmodules'
+
+    # Keep the public README independent from the private source.
+    --filter='H /README.md'
+    --filter='P /README.md'
+    --exclude='/README.md'
+
+    # Keep the public PDF directory independent from the private source.
+    --filter='H /PDF/***'
+    --filter='H /PDF'
+    --filter='P /PDF/***'
+    --filter='P /PDF'
 
     # Evaluation-related content stays private.
     --exclude='*[Ee][Vv][Aa][Ll]*'
@@ -65,7 +90,7 @@ rsync -av --delete --delete-excluded "${RSYNC_FILTERS[@]}" "$PRIVATE_DIR/" "$PUB
     cd "$PUBLIC_DIR"
     git add .
     if git commit -m "Update mirrored content from private submodule"; then
-        git push origin main
+        git push "$PUBLIC_REMOTE_NAME" main
     else
         echo "Rien a commit"
     fi
